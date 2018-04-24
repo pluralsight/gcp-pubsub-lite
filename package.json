@@ -1,0 +1,35 @@
+{
+  "name": "@pheasantplucker/gc-pubsub",
+  "version": "1.0.0",
+  "description": "A failables wrapper around Google Cloud's Pubsub",
+  "main": "src/pubsub.js",
+  "scripts": {
+    "test": "jest --forceExit",
+    "lint": "esw .eslintrc.js src/ lib/ tests/ -w --fix --ignore-pattern !.eslintrc.js",
+    "deploy": "./deploy.sh"
+  },
+  "keywords": [
+    "google",
+    "google",
+    "cloud",
+    "pubsub",
+    "messaging",
+    "failables"
+  ],
+  "author": "cgdibble@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^4.17.0",
+    "eslint-plugin-jest": "^21.9.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-watch": "^3.1.3",
+    "jest": "^21.2.1",
+    "prettier": "^1.7.4",
+    "prettier-eslint": "^8.2.1"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^0.18.0",
+    "@pheasantplucker/failables": "^2.0.4",
+    "jest": "^22.4.3"
+  }
+}
