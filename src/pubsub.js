@@ -1,4 +1,4 @@
-const { failure, success } = require(`@pheasantplucker/failables`)
+const { failure, success } = require('@pheasantplucker/failables')
 const PubSub = require('@google-cloud/pubsub')
 
 let client
