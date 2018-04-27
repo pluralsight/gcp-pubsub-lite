@@ -12,8 +12,12 @@ const {
   createSubscription,
   deleteSubscription,
   subscriptionExists,
+  publish,
+  createSubscriptionClient,
 } = require('./pubsub')
 const uuid = require('uuid')
+
+// const { GC_PROJECT_ID } = process.env
 
 describe(`pubsub.js`, () => {
   const _createClient = (config = {}) => {
@@ -106,6 +110,45 @@ describe(`pubsub.js`, () => {
     it(`subscription should not exist`, async () => {
       const result = await subscriptionExists(subscriptionName)
       assertSuccess(result, false)
+    })
+  })
+
+  describe('publish() & pull()', () => {
+    const topicName = `lib_test_${uuid.v4()}`
+
+    _createClient()
+
+    it(`create a topic`, async () => {
+      const result = await createTopic(topicName)
+      assertSuccess(result)
+    })
+
+    it(`should publish an object message`, async () => {
+      const message = { isMessage: true }
+      const result = await publish(topicName, message)
+      assertSuccess(result)
+    })
+
+    it.skip(`should pull message`, async () => {
+      // const result = await pull()
+    })
+
+    it(`should publish a string message`, async () => {
+      const message = 'hello '
+      const result = await publish(topicName, message)
+      assertSuccess(result)
+    })
+
+    it(`delete the topic`, async () => {
+      const result = await deleteTopic(topicName)
+      assertSuccess(result)
+    })
+  })
+
+  describe(`createSubscriptionClient()`, () => {
+    it(`should create that client`, async () => {
+      const result = await createSubscriptionClient()
+      assertSuccess(result)
     })
   })
 })

@@ -13,7 +13,7 @@ const setTopic = (topicName, topic) => (topics[topicName] = topic)
 
 const createClient = config => {
   try {
-    client = new PubSub(config)
+    client = new PubSub()
     return success(client)
   } catch (e) {
     return failure(e.toString())
@@ -96,6 +96,27 @@ const subscriptionExists = async subscriptionName => {
   }
 }
 
+const publish = async (topicName, message) => {
+  const buffered = Buffer.from(JSON.stringify(message))
+  try {
+    const topic = getTopic(topicName)
+    const publisher = topic.publisher()
+    const result = await publisher.publish(buffered)
+    return success({ messageId: result })
+  } catch (e) {
+    return failure(e.toString())
+  }
+}
+
+const createSubscriptionClient = async () => {
+  try {
+    const client = new PubSub.v1.SubscriberClient()
+    return success(client)
+  } catch (e) {
+    return failure(e.toString())
+  }
+}
+
 module.exports = {
   createClient,
   createTopic,
@@ -104,4 +125,6 @@ module.exports = {
   createSubscription,
   deleteSubscription,
   subscriptionExists,
+  publish,
+  createSubscriptionClient,
 }
