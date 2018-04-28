@@ -33,6 +33,7 @@
     "@google-cloud/pubsub": "^0.18.0",
     "@pheasantplucker/failables": "^2.0.4",
     "jest": "^22.4.3",
+    "ramda": "^0.25.0",
     "uuid": "^3.2.1"
   }
 }

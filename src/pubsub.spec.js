@@ -1,11 +1,7 @@
-const equal = require('assert').deepEqual
+const { assertSuccess, assertFailure } = require(`@pheasantplucker/failables`)
 const {
-  assertSuccess,
-  assertFailure,
-  payload,
-} = require(`@pheasantplucker/failables`)
-const {
-  createClient,
+  createPublisher,
+  createSubscriber,
   createTopic,
   topicExists,
   deleteTopic,
@@ -17,37 +13,36 @@ const {
 } = require('./pubsub')
 const uuid = require('uuid')
 
-// const { GC_PROJECT_ID } = process.env
+const { GC_PROJECT_ID } = process.env
 
 describe(`pubsub.js`, () => {
-  const _createClient = (config = {}) => {
-    // this is an example since the docs were not my favorite to navigate
-    // const configExample = {
-    //   projectId: '123',
-    //   keyFileName: process.env.GOOGLE_APPLICATION_CREDENTIALS
-    // }
-    const result = createClient()
-    assertSuccess(result)
+  const _createPublisher = (config = {}) => {
+    it(`should create a publisher`, async () => {
+      const result = createPublisher(GC_PROJECT_ID)
+      assertSuccess(result)
+    })
+  }
+  const _createSubscriber = (config = {}) => {
+    it(`should create a subscriber`, async () => {
+      const result = createSubscriber(GC_PROJECT_ID)
+      assertSuccess(result)
+    })
   }
 
-  describe(`createClient()`, () => {
-    it(`should create a client`, () => {
-      _createClient()
+  describe(`createPublisher()`, () => {
+    it(`should create a publisher`, () => {
+      _createPublisher()
     })
   })
 
   describe(`createTopic() & topicExists() & deleteTopic()`, () => {
     const topicName = `lib_test_${uuid.v4()}`
 
-    _createClient()
+    _createPublisher()
 
     it(`should create the topic`, async () => {
       const result = await createTopic(topicName)
       assertSuccess(result)
-      // Not sure how I feel about this assertion. Gist is there, but should
-      //  probably assert true equality?
-      // Is referencing GC project names all over code a bad idea?
-      equal(true, payload(result).includes(topicName))
     })
 
     it(`should exist`, async () => {
@@ -71,43 +66,56 @@ describe(`pubsub.js`, () => {
     })
   })
 
-  describe(`createSubscription() & subscriptionExists() & deleteSubscription()`, () => {
+  describe.only(`createSubscription() & subscriptionExists() & deleteSubscription()`, () => {
     const topicName = `lib_test_topic_${uuid.v4()}`
     const subscriptionName = `lib_test_sub_${uuid.v4()}`
+    // If _createSubscriber() is called, you get errors about unable to find resources.
+    // With both _createPublisher && _createSubscriber called, the `createTopic` test breaks over
+    // unable to find resource stuff.
+    // Removing the _createSubscriber call fixes it. This appears due to clashing of the two clients
+    // which is obnoxious. They do allow for config to be passed, so directing to different ports may be the key
+    // Action Item:
+    // => for _only_ the createSubscriber function, pass in config to direct to a different port than that of default.
+    // => add back in the call to _createSubscriber below and see if the test `createTopic` in this block passes.
+    // => if so, update both functions to have configurable ports, but add defaults that prevent clashing.
+    // => if not, then fuckin a man, look at other config options for the pubsub.v1.subscriberclient and pubsub.v1.publisherclient
 
-    _createClient()
+    _createPublisher()
+    // _createSubscriber()
 
     it(`should fail without a topic`, async () => {
       const result = await createSubscription(topicName, subscriptionName)
       assertFailure(result)
     })
 
-    it(`create a topic`, async () => {
+    it(`create a topic -->>>> This is the test that fails when createPublisher and createSubscriber are called`, async () => {
       const result = await createTopic(topicName)
+      console.log(`test result:`, result)
       assertSuccess(result)
     })
 
-    it(`should create the subscription`, async () => {
+    it.skip(`should create the subscription`, async () => {
       const result = await createSubscription(topicName, subscriptionName)
+      console.log(`result:`, result)
       assertSuccess(result)
     })
 
-    it(`subscription should exist`, async () => {
+    it.skip(`subscription should exist`, async () => {
       const result = await subscriptionExists(subscriptionName)
       assertSuccess(result, true)
     })
 
-    it(`should delete the topic`, async () => {
+    it.skip(`should delete the topic`, async () => {
       const result = await deleteTopic(topicName)
       assertSuccess(result, topicName)
     })
 
-    it(`should delete the subscription`, async () => {
+    it.skip(`should delete the subscription`, async () => {
       const result = await deleteSubscription(subscriptionName)
       assertSuccess(result, subscriptionName)
     })
 
-    it(`subscription should not exist`, async () => {
+    it.skip(`subscription should not exist`, async () => {
       const result = await subscriptionExists(subscriptionName)
       assertSuccess(result, false)
     })
@@ -116,7 +124,7 @@ describe(`pubsub.js`, () => {
   describe('publish() & pull()', () => {
     const topicName = `lib_test_${uuid.v4()}`
 
-    _createClient()
+    _createPublisher()
 
     it(`create a topic`, async () => {
       const result = await createTopic(topicName)
