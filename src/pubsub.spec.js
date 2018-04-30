@@ -15,7 +15,7 @@ const uuid = require('uuid')
 
 const { GC_PROJECT_ID } = process.env
 
-describe(`pubsub.js`, () => {
+describe(`pubsub.js`, function() {
   const _createPublisher = (config = {}) => {
     const result = createPublisher(GC_PROJECT_ID)
     assertSuccess(result)
@@ -65,17 +65,6 @@ describe(`pubsub.js`, () => {
   describe(`createSubscription() & subscriptionExists() & deleteSubscription()`, () => {
     const topicName = `lib_test_topic_${uuid.v4()}`
     const subscriptionName = `lib_test_sub_${uuid.v4()}`
-    // If _createSubscriber() is called, you get errors about unable to find resources.
-    // With both _createPublisher && _createSubscriber called, the `createTopic` test breaks over
-    // unable to find resource stuff.
-    // Removing the _createSubscriber call fixes it. This appears due to clashing of the two clients
-    // which is obnoxious. They do allow for config to be passed, so directing to different ports may be the key
-    // Action Item:
-    // => for _only_ the createSubscriber function, pass in config to direct to a different port than that of default.
-    // => add back in the call to _createSubscriber below and see if the test `createTopic` in this block passes.
-    // => if so, update both functions to have configurable ports, but add defaults that prevent clashing.
-    // => if not, then fuckin a man, look at other config options for the pubsub.v1.subscriberclient and pubsub.v1.publisherclient
-
     _createPublisher()
     _createSubscriber()
 
@@ -91,7 +80,6 @@ describe(`pubsub.js`, () => {
 
     it(`should create the subscription`, async () => {
       const result = await createSubscription(topicName, subscriptionName)
-      console.log(`result:`, result)
       assertSuccess(result)
     })
 

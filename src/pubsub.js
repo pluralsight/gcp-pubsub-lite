@@ -63,7 +63,7 @@ const createPublisher = projectId => {
 const createSubscriber = projectId => {
   project = projectId
   try {
-    subscriber = new PubSub.v1.SubscriberClient()
+    subscriber = new PubSub.v1.SubscriberClient({ port: 8080 })
     return success(subscriber)
   } catch (e) {
     return failure(e.toString())
@@ -135,6 +135,7 @@ const createSubscription = async (topicName, subscriptionName) => {
 
   if (isFailure(gcSubscriptionPathResult)) return gcSubscriptionPathResult
   const subscriptionPath = payload(gcSubscriptionPathResult)
+
   const gcTopicPathResult = constructTopicPath(project, topicName)
   if (isFailure(gcTopicPathResult)) return gcTopicPathResult
   const topicPath = payload(gcTopicPathResult)
