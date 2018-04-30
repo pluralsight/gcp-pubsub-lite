@@ -65,8 +65,12 @@ describe(`pubsub.js`, function() {
   describe(`createSubscription() & subscriptionExists() & deleteSubscription()`, () => {
     const topicName = `lib_test_topic_${uuid.v4()}`
     const subscriptionName = `lib_test_sub_${uuid.v4()}`
-    _createPublisher()
-    _createSubscriber()
+    it(`should create publisher`, async () => {
+      _createPublisher()
+    })
+    it(`should create subscriber`, async () => {
+      _createSubscriber()
+    })
 
     it(`should fail without a topic`, async () => {
       const result = await createSubscription('', subscriptionName)

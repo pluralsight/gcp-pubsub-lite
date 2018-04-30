@@ -63,7 +63,7 @@ const createPublisher = projectId => {
 const createSubscriber = projectId => {
   project = projectId
   try {
-    subscriber = new PubSub.v1.SubscriberClient({ port: 8080 })
+    subscriber = new PubSub.v1.SubscriberClient()
     return success(subscriber)
   } catch (e) {
     return failure(e.toString())
@@ -108,13 +108,8 @@ const topicExists = async topicName => {
   const getAllTopicsResult = await getAllTopics()
   if (isFailure(getAllTopicsResult)) return getAllTopicsResult
   const allTopics = payload(getAllTopicsResult)
-  try {
-    const justNames = pluck('name', allTopics)
-    const exists = contains(topic, justNames)
-    return success(exists)
-  } catch (e) {
-    return failure(e.toString())
-  }
+
+  return success(propertyMatches(allTopics, 'name', topic))
 }
 
 const deleteTopic = async topicName => {
@@ -144,9 +139,9 @@ const createSubscription = async (topicName, subscriptionName) => {
       name: subscriptionPath,
       topic: topicPath,
     }
-    const subscription = await subscriber.createSubscription(options)
-    console.log('subscription created: ', subscription)
-    setSubscription(subscriptionName, subscription)
+    const [subscription] = await subscriber.createSubscription(options)
+    const { name } = subscription
+    setSubscription(subscriptionName, name)
     return success(subscription)
   } catch (e) {
     return failure(e.toString())
@@ -156,39 +151,42 @@ const createSubscription = async (topicName, subscriptionName) => {
 const deleteSubscription = async subscriptionName => {
   try {
     const subscription = getSubscription(subscriptionName)
-    await subscription.delete()
+    await subscriber.deleteSubscription({ subscription })
     return success(subscriptionName)
   } catch (e) {
     return failure(e.toString())
   }
 }
 
-const subscriptionExists = async subscriptionName => {
+const getAllSubscriptions = async () => {
   try {
-    const subscription = getSubscription(subscriptionName)
-    console.log(
-      subscription,
-      " we are getting the CONFIG of a subscription, which doesn't have an EXISTS method ",
-      subscriptionName
-    )
-    const result = await subscription.exists()
-    const [exists] = result
-    return success(exists)
+    const projectPath = subscriber.projectPath(project)
+    const [resources] = await subscriber.listSubscriptions({
+      project: projectPath,
+    })
+    return success(resources)
   } catch (e) {
     return failure(e.toString())
   }
 }
 
+const subscriptionExists = async subscriptionName => {
+  const subscription = getSubscription(subscriptionName)
+  const getAllSubscriptionsResult = await getAllSubscriptions()
+  if (isFailure(getAllSubscriptionsResult)) return getAllSubscriptionsResult
+  const allSubscriptions = payload(getAllSubscriptionsResult)
+
+  return success(propertyMatches(allSubscriptions, 'name', subscription))
+}
+
+const propertyMatches = (list, property, name) => {
+  const justNames = pluck(property, list)
+  return contains(name, justNames)
+}
+
 const publish = async (topicName, message) => {
-  const buffered = Buffer.from(JSON.stringify(message))
-  try {
-    const topic = getTopic(topicName)
-    const publisher = topic.publisher()
-    const result = await publisher.publish(buffered)
-    return success({ messageId: result })
-  } catch (e) {
-    return failure(e.toString())
-  }
+  // const buffered = Buffer.from(JSON.stringify(message))
+  // Implement this using the PublisherClient paradigm
 }
 
 const createSubscriptionClient = async () => {
