@@ -144,7 +144,7 @@ const createSubscription = async (topicName, subscriptionName) => {
       topic: topicPath,
     }
     const subscription = await subscriber.createSubscription(options)
-    console.log("subscription created: ", subscription)
+    console.log('subscription created: ', subscription)
     setSubscription(subscriptionName, subscription)
     return success(subscription)
   } catch (e) {
@@ -165,7 +165,11 @@ const deleteSubscription = async subscriptionName => {
 const subscriptionExists = async subscriptionName => {
   try {
     const subscription = getSubscription(subscriptionName)
-    console.log(subscription, " we are getting the CONFIG of a subscription, which doesn't have an EXISTS method ", subscriptionName)
+    console.log(
+      subscription,
+      " we are getting the CONFIG of a subscription, which doesn't have an EXISTS method ",
+      subscriptionName
+    )
     const result = await subscription.exists()
     const [exists] = result
     return success(exists)
