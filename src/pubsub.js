@@ -86,9 +86,6 @@ const createTopic = async topicName => {
     const topicPath = payload(gcTopicNameResult)
     const [topic] = await publisher.createTopic({ name: topicPath })
     const { name } = topic
-    console.log(`name:`, name)
-    console.log(`topic:`, topic)
-    console.log(`topicName:`, topicName)
     setTopic(topicName, name)
     return success(topicName)
   } catch (e) {
@@ -135,6 +132,7 @@ const createSubscription = async (topicName, subscriptionName) => {
     project,
     subscriptionName
   )
+
   if (isFailure(gcSubscriptionPathResult)) return gcSubscriptionPathResult
   const subscriptionPath = payload(gcSubscriptionPathResult)
   const gcTopicPathResult = constructTopicPath(project, topicName)
@@ -145,9 +143,10 @@ const createSubscription = async (topicName, subscriptionName) => {
       name: subscriptionPath,
       topic: topicPath,
     }
-    const [subscription] = subscriber.createSubscription(options)
+    const subscription = await subscriber.createSubscription(options)
+    console.log("subscription created: ", subscription)
+    setSubscription(subscriptionName, subscription)
     return success(subscription)
-    // setSubscription(subscriptionName, policy)
   } catch (e) {
     return failure(e.toString())
   }
@@ -166,6 +165,7 @@ const deleteSubscription = async subscriptionName => {
 const subscriptionExists = async subscriptionName => {
   try {
     const subscription = getSubscription(subscriptionName)
+    console.log(subscription, " we are getting the CONFIG of a subscription, which doesn't have an EXISTS method ", subscriptionName)
     const result = await subscription.exists()
     const [exists] = result
     return success(exists)
