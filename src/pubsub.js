@@ -189,15 +189,6 @@ const publish = async (topicName, message) => {
   // Implement this using the PublisherClient paradigm
 }
 
-const createSubscriptionClient = async () => {
-  try {
-    const client = new PubSub.v1.SubscriberClient()
-    return success(client)
-  } catch (e) {
-    return failure(e.toString())
-  }
-}
-
 module.exports = {
   createPublisher,
   createSubscriber,
@@ -209,5 +200,4 @@ module.exports = {
   deleteSubscription,
   subscriptionExists,
   publish,
-  createSubscriptionClient,
 }

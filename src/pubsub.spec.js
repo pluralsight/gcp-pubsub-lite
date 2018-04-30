@@ -9,7 +9,6 @@ const {
   deleteSubscription,
   subscriptionExists,
   publish,
-  createSubscriptionClient,
 } = require('./pubsub')
 const uuid = require('uuid')
 
@@ -136,13 +135,6 @@ describe(`pubsub.js`, function() {
 
     it(`delete the topic`, async () => {
       const result = await deleteTopic(topicName)
-      assertSuccess(result)
-    })
-  })
-
-  describe(`createSubscriptionClient()`, () => {
-    it(`should create that client`, async () => {
-      const result = await createSubscriptionClient()
       assertSuccess(result)
     })
   })
