@@ -131,9 +131,7 @@ const createSubscription = async (topicName, subscriptionName) => {
   if (isFailure(gcSubscriptionPathResult)) return gcSubscriptionPathResult
   const subscriptionPath = payload(gcSubscriptionPathResult)
 
-  const gcTopicPathResult = constructTopicPath(project, topicName)
-  if (isFailure(gcTopicPathResult)) return gcTopicPathResult
-  const topicPath = payload(gcTopicPathResult)
+  const topicPath = getTopic(topicName)
   try {
     const options = {
       name: subscriptionPath,
@@ -185,8 +183,17 @@ const propertyMatches = (list, property, name) => {
 }
 
 const publish = async (topicName, message) => {
-  // const buffered = Buffer.from(JSON.stringify(message))
-  // Implement this using the PublisherClient paradigm
+  const topic = getTopic(topicName)
+  const request = {
+    topic: topic,
+    messages: [message],
+  }
+  try {
+    const result = await publisher.publish(request)
+    return success(result)
+  } catch (e) {
+    return failure(e.toString())
+  }
 }
 
 module.exports = {
