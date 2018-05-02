@@ -196,6 +196,19 @@ const publish = async (topicName, message) => {
   }
 }
 
+const pull = async (subscriptionName, maxMessages = 1) => {
+  const request = {
+    subscription: getSubscription(subscriptionName),
+    maxMessages,
+  }
+  try {
+    const result = await subscriber.pull(request)
+    return success(result)
+  } catch (e) {
+    return failure(e.toString())
+  }
+}
+
 module.exports = {
   createPublisher,
   createSubscriber,
@@ -207,4 +220,5 @@ module.exports = {
   deleteSubscription,
   subscriptionExists,
   publish,
+  pull,
 }

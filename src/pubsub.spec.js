@@ -9,6 +9,7 @@ const {
   deleteSubscription,
   subscriptionExists,
   publish,
+  pull,
 } = require('./pubsub')
 const uuid = require('uuid')
 
@@ -107,32 +108,39 @@ describe(`pubsub.js`, function() {
     })
   })
 
-  describe.only('publish() & pull()', () => {
+  describe('publish() & pull()', () => {
     const topicName = `lib_test_${uuid.v4()}`
+    const subscriptionName = `lib_test_${uuid.v4()}`
 
-    _createPublisher()
+    it(`create subscriber`, () => {
+      _createSubscriber()
+    })
+    it(`create publisher`, () => {
+      _createPublisher()
+    })
 
     it(`should create a topic`, async () => {
       const result = await createTopic(topicName)
       assertSuccess(result)
     })
 
-    it(`should publish an object message`, async () => {
-      const message = {
-        data: { isMessage: true },
-      }
-      const result = await publish(topicName, message)
-      console.log(`result:`, result)
+    it(`should create the subscription`, async () => {
+      const result = await createSubscription(topicName, subscriptionName)
       assertSuccess(result)
     })
 
-    it.skip(`should pull message`, async () => {
-      // const result = await pull()
+    it(`should publish an object message`, async () => {
+      const message = {
+        data: Buffer.from(JSON.stringify({ isMessage: true })),
+        attributes: { tim: 'not in sd' },
+      }
+      const result = await publish(topicName, message)
+      assertSuccess(result)
     })
 
-    it.skip(`should publish a string message`, async () => {
-      const message = 'hello '
-      const result = await publish(topicName, message)
+    it(`should pull message`, async () => {
+      const maxMessages = 1
+      const result = await pull(subscriptionName, maxMessages)
       assertSuccess(result)
     })
 
