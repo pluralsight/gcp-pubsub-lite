@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --forceExit",
     "lint": "esw .eslintrc.js src/ lib/ tests/ -w --fix --ignore-pattern !.eslintrc.js",
-    "deploy": "./deploy.sh"
+    "deploy": "./deploy.sh",
+    "build": "babel src --out-dir build"
   },
   "keywords": [
     "google",
@@ -22,6 +23,8 @@
   "author": "cgdibble@gmail.com",
   "license": "ISC",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "eslint": "^4.17.0",
     "eslint-plugin-jest": "^21.9.0",
     "eslint-plugin-prettier": "^2.6.0",
@@ -31,7 +34,7 @@
   },
   "dependencies": {
     "@google-cloud/pubsub": "^0.18.0",
-    "@pheasantplucker/failables": "^2.0.4",
+    "@pheasantplucker/failables-node6": "^2.0.3",
     "jest": "^22.4.3",
     "ramda": "^0.25.0",
     "uuid": "^3.2.1"

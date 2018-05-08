@@ -1,4 +1,4 @@
-const { assertSuccess, assertFailure } = require(`@pheasantplucker/failables`)
+const { assertSuccess, assertFailure } = require(`@pheasantplucker/failables-node6`)
 const {
   createPublisher,
   createSubscriber,
