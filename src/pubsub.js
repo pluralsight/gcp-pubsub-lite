@@ -3,9 +3,11 @@ const {
   success,
   isFailure,
   payload,
+  anyFailed,
+  firstFailure,
 } = require('@pheasantplucker/failables')
 const PubSub = require('@google-cloud/pubsub')
-const { pluck, contains } = require('ramda')
+const { pluck, contains, map } = require('ramda')
 
 let client
 let project
@@ -184,9 +186,14 @@ const propertyMatches = (list, property, name) => {
 
 const publish = async (topicName, message) => {
   const topic = getTopic(topicName)
+  const { data: messageData } = message
+  const bufferedData = Buffer.from(messageData)
+  const bufferedMessage = Object.assign({}, message, {
+    data: bufferedData,
+  })
   const request = {
     topic: topic,
-    messages: [message],
+    messages: [bufferedMessage],
   }
   try {
     const result = await publisher.publish(request)
@@ -194,6 +201,28 @@ const publish = async (topicName, message) => {
   } catch (e) {
     return failure(e.toString())
   }
+}
+
+const publishJson = async (topicName, message) => {
+  const { data: messageData } = message
+  const stringifiedData = JSON.stringify(messageData)
+  const updatedMessage = Object.assign({}, message, { data: stringifiedData })
+  return publish(topicName, updatedMessage)
+}
+
+const publishMany = async (topicName, messages) => {
+  const promises = map(m => publish(topicName, m), messages)
+  const results = await Promise.all(promises)
+  if (anyFailed(results)) return firstFailure(results)
+  return success(messages.length)
+}
+
+const publishManyJson = async (topicName, messages) => {
+  const updatedMessages = map(
+    m => Object.assign({}, m, { data: JSON.stringify(m.data) }),
+    messages
+  )
+  return publishMany(topicName, updatedMessages)
 }
 
 const pull = async (subscriptionName, maxMessages = 1) => {
@@ -220,5 +249,8 @@ module.exports = {
   deleteSubscription,
   subscriptionExists,
   publish,
+  publishJson,
+  publishMany,
+  publishManyJson,
   pull,
 }
