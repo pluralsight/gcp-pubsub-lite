@@ -225,13 +225,31 @@ const publishManyJson = async (topicName, messages) => {
   return publishMany(topicName, updatedMessages)
 }
 
-const pull = async (subscriptionName, maxMessages = 1) => {
+const pull = async (
+  subscriptionName,
+  maxMessages = 1,
+  returnImmediately = true
+) => {
   const request = {
     subscription: getSubscription(subscriptionName),
     maxMessages,
+    returnImmediately,
   }
   try {
     const result = await subscriber.pull(request)
+    return success(result)
+  } catch (e) {
+    return failure(e.toString())
+  }
+}
+
+const acknowledge = async (subscriptionName, ackIds) => {
+  const request = {
+    subscription: getSubscription(subscriptionName),
+    ackIds,
+  }
+  try {
+    const result = await subscriber.acknowledge(request)
     return success(result)
   } catch (e) {
     return failure(e.toString())
@@ -253,4 +271,5 @@ module.exports = {
   publishMany,
   publishManyJson,
   pull,
+  acknowledge,
 }
