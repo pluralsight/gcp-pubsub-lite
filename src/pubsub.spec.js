@@ -1,3 +1,4 @@
+const equal = require('assert').deepEqual
 const {
   payload,
   assertSuccess,
@@ -217,6 +218,14 @@ describe(`pubsub.js`, function() {
   describe(`publishManyJson()`, () => {
     const topicName = `lib_test_${uuid.v4()}`
     const subscriptionName = `lib_test_${uuid.v4()}`
+    const message1 = {
+      data: { isOne: true },
+      attributes: { today: 'friday' },
+    }
+    const message2 = {
+      data: { isOne: false },
+      attributes: { today: 'saturday' },
+    }
 
     it(`create subscriber`, () => {
       _createSubscriber()
@@ -236,36 +245,29 @@ describe(`pubsub.js`, function() {
     })
 
     it(`should publish many messages`, async () => {
-      const message1 = {
-        data: { isOne: true },
-        attributes: { today: 'friday' },
-      }
-      const message2 = {
-        data: { isOne: false },
-        attributes: { today: 'saturday' },
-      }
-
       const result = await publishManyJson(topicName, [message1, message2])
       assertSuccess(result, 2)
     })
 
     it(`should pull message`, async () => {
+      // This. Test. Is. Hideous. But I feel it needs to validate both maxMessages
+      // and I don't know how I want to flatten the ugly message from GC yet.
+      const expected1 = Object.assign({}, message1, {
+        data: Buffer.from(JSON.stringify(message1.data)),
+      })
+      const expected2 = Object.assign({}, message2, {
+        data: Buffer.from(JSON.stringify(message2.data)),
+      })
       const maxMessages = 2
       const result = await pull(subscriptionName, maxMessages)
       const [response] = payload(result)
       const { receivedMessages } = response
       const [msg1, msg2] = receivedMessages
       const { message: msg1Body } = msg1
-      /*
-
-      { attributes: { today: 'friday' },
-            data: <Buffer 7b 22 69 73 4f 6e 65 22 3a 74 72 75 65 7d>,
-            messageId: '89708341685311',
-            publishTime: { seconds: '1526049152', nanos: 594000000 } }
-
-      */
-      console.log(`result:`, payload(result))
+      const { message: msg2Body } = msg2
       assertSuccess(result)
+      equal(expected1, { data: msg1Body.data, attributes: msg1Body.attributes })
+      equal(expected2, { data: msg2Body.data, attributes: msg2Body.attributes })
     })
 
     it(`delete the topic`, async () => {
