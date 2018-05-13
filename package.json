@@ -1,6 +1,6 @@
 {
   "name": "@pheasantplucker/gc-pubsub",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A failables wrapper around Google Cloud's Pubsub",
   "main": "./src/pubsub.js",
   "scripts": {
