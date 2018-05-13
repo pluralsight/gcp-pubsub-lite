@@ -151,7 +151,8 @@ describe(`pubsub.js`, function() {
     let ackId
     it(`should pull message`, async () => {
       const maxMessages = 1
-      const result = await pull(subscriptionName, maxMessages)
+      const returnImmediately = true
+      const result = await pull(subscriptionName, maxMessages, returnImmediately)
       ackId = payload(result)[0].receivedMessages[0].ackId
       assertSuccess(result)
     })
@@ -224,7 +225,8 @@ describe(`pubsub.js`, function() {
 
     it(`should pull message`, async () => {
       const maxMessages = 2
-      const result = await pull(subscriptionName, maxMessages)
+      const returnImmediately = true
+      const result = await pull(subscriptionName, maxMessages, returnImmediately)
       assertSuccess(result)
     })
 
@@ -283,7 +285,8 @@ describe(`pubsub.js`, function() {
         data: Buffer.from(JSON.stringify(message2.data)),
       })
       const maxMessages = 2
-      const result = await pull(subscriptionName, maxMessages)
+      const returnImmediately = true
+      const result = await pull(subscriptionName, maxMessages, returnImmediately)
       const [response] = payload(result)
       const { receivedMessages } = response
       const [msg1, msg2] = receivedMessages
@@ -337,7 +340,8 @@ describe(`pubsub.js`, function() {
 
     it(`should pull message`, async () => {
       const maxMessages = 1
-      const result = await pull(subscriptionName, maxMessages)
+      const returnImmediately = true
+      const result = await pull(subscriptionName, maxMessages, returnImmediately)
       assertSuccess(result)
     })
 
