@@ -152,7 +152,11 @@ describe(`pubsub.js`, function() {
     it(`should pull message`, async () => {
       const maxMessages = 1
       const returnImmediately = true
-      const result = await pull(subscriptionName, maxMessages, returnImmediately)
+      const result = await pull(
+        subscriptionName,
+        maxMessages,
+        returnImmediately
+      )
       ackId = payload(result)[0].receivedMessages[0].ackId
       assertSuccess(result)
     })
@@ -226,7 +230,11 @@ describe(`pubsub.js`, function() {
     it(`should pull message`, async () => {
       const maxMessages = 2
       const returnImmediately = true
-      const result = await pull(subscriptionName, maxMessages, returnImmediately)
+      const result = await pull(
+        subscriptionName,
+        maxMessages,
+        returnImmediately
+      )
       assertSuccess(result)
     })
 
@@ -286,7 +294,11 @@ describe(`pubsub.js`, function() {
       })
       const maxMessages = 2
       const returnImmediately = true
-      const result = await pull(subscriptionName, maxMessages, returnImmediately)
+      const result = await pull(
+        subscriptionName,
+        maxMessages,
+        returnImmediately
+      )
       const [response] = payload(result)
       const { receivedMessages } = response
       const [msg1, msg2] = receivedMessages
@@ -341,7 +353,11 @@ describe(`pubsub.js`, function() {
     it(`should pull message`, async () => {
       const maxMessages = 1
       const returnImmediately = true
-      const result = await pull(subscriptionName, maxMessages, returnImmediately)
+      const result = await pull(
+        subscriptionName,
+        maxMessages,
+        returnImmediately
+      )
       assertSuccess(result)
     })
 
