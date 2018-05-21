@@ -72,13 +72,14 @@ const deleteTopic = async topicName => {
   }
 }
 
-const createSubscription = async (topicName, subscriptionName) => {
+const createSubscription = async (topicName, subscriptionName, options = {}) => {
   try {
-    const options = {
+    const request = {
       name: subscriber.subscriptionPath(project, subscriptionName),
       topic: publisher.topicPath(project, topicName),
     }
-    const result = await subscriber.createSubscription(options)
+    const allOptions = Object.assign({}, request, options)
+    const result = await subscriber.createSubscription(allOptions)
     return success(result)
   } catch (e) {
     return failure(e.toString())
