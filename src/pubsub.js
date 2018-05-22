@@ -13,8 +13,8 @@ let project
 let publisher
 let subscriber
 
-const createPublisher = projectId => {
-  project = projectId
+const setProject = projectId => (project = projectId)
+const createPublisher = () => {
   try {
     publisher = new PubSub.v1.PublisherClient()
     return success(publisher)
@@ -22,9 +22,7 @@ const createPublisher = projectId => {
     return failure(e.toString())
   }
 }
-
-const createSubscriber = projectId => {
-  project = projectId
+const createSubscriber = () => {
   try {
     subscriber = new PubSub.v1.SubscriberClient()
     return success(subscriber)
@@ -33,11 +31,18 @@ const createSubscriber = projectId => {
   }
 }
 
+createPublisher()
+createSubscriber()
+
 const createTopic = async topicName => {
+  const existsResult = await topicExists(topicName)
+  if (isFailure(existsResult)) return existsResult
+  const exists = payload(existsResult)
+  if (exists) return success(topicName)
   try {
     const topic = publisher.topicPath(project, topicName)
-    const result = await publisher.createTopic({ name: topic })
-    return success(result)
+    await publisher.createTopic({ name: topic })
+    return success(topicName)
   } catch (e) {
     return failure(e.toString())
   }
@@ -54,7 +59,12 @@ const getAllTopics = async () => {
 }
 
 const topicExists = async topicName => {
-  const topic = publisher.topicPath(project, topicName)
+  let topic
+  try {
+    topic = publisher.topicPath(project, topicName)
+  } catch (e) {
+    return failure(e.toString())
+  }
   const getAllTopicsResult = await getAllTopics()
   if (isFailure(getAllTopicsResult)) return getAllTopicsResult
   const allTopics = payload(getAllTopicsResult)
@@ -72,15 +82,25 @@ const deleteTopic = async topicName => {
   }
 }
 
-const createSubscription = async (topicName, subscriptionName, options = {}) => {
+const createSubscription = async (
+  topicName,
+  subscriptionName,
+  options = {}
+) => {
+  const subResult = await subscriptionExists(subscriptionName)
+  if (isFailure(subResult)) return subResult
+  const subExists = payload(subResult)
+  if (subExists) return success(subscriptionName)
+  const topicResult = await createTopic(topicName)
+  if (isFailure(topicResult)) return topicResult
   try {
     const request = {
       name: subscriber.subscriptionPath(project, subscriptionName),
       topic: publisher.topicPath(project, topicName),
     }
     const allOptions = Object.assign({}, request, options)
-    const result = await subscriber.createSubscription(allOptions)
-    return success(result)
+    await subscriber.createSubscription(allOptions)
+    return success(subscriptionName)
   } catch (e) {
     return failure(e.toString())
   }
@@ -209,4 +229,5 @@ module.exports = {
   publishManyJson,
   pull,
   acknowledge,
+  setProject,
 }

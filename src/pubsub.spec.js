@@ -5,6 +5,7 @@ const {
   assertFailure,
 } = require(`@pheasantplucker/failables`)
 const {
+  setProject,
   createPublisher,
   createSubscriber,
   createTopic,
@@ -25,25 +26,26 @@ const uuid = require('uuid')
 const { GC_PROJECT_ID } = process.env
 
 describe(`pubsub.js`, function() {
-  const _createPublisher = (config = {}) => {
-    const result = createPublisher(GC_PROJECT_ID)
-    assertSuccess(result)
-  }
-  const _createSubscriber = (config = {}) => {
-    const result = createSubscriber(GC_PROJECT_ID)
-    assertSuccess(result)
-  }
-
   describe(`createPublisher()`, () => {
     it(`should create a publisher`, () => {
-      _createPublisher()
+      const result = createPublisher()
+      assertSuccess(result)
+    })
+  })
+
+  describe(`createSubscriber()`, () => {
+    it(`should create a subscriber`, () => {
+      const result = createSubscriber()
+      assertSuccess(result)
     })
   })
 
   describe(`createTopic() & topicExists() & deleteTopic()`, () => {
     const topicName = `lib_test_${uuid.v4()}`
 
-    _createPublisher()
+    it(`should set the project`, () => {
+      setProject(GC_PROJECT_ID)
+    })
 
     it(`should create the topic`, async () => {
       const result = await createTopic(topicName)
@@ -74,16 +76,24 @@ describe(`pubsub.js`, function() {
   describe(`createSubscription() & subscriptionExists() & deleteSubscription()`, () => {
     const topicName = `lib_test_topic_${uuid.v4()}`
     const subscriptionName = `lib_test_sub_${uuid.v4()}`
-    it(`should create publisher`, async () => {
-      _createPublisher()
-    })
-    it(`should create subscriber`, async () => {
-      _createSubscriber()
+    const onTheFlyTopic = 'ontheflytopic'
+    it(`should set the project`, () => {
+      setProject(GC_PROJECT_ID)
     })
 
     it(`should fail without a topic`, async () => {
       const result = await createSubscription('', subscriptionName)
       assertFailure(result)
+    })
+
+    it(`should create the topic if it does not exist`, async () => {
+      const result = await createSubscription(onTheFlyTopic, subscriptionName)
+      assertSuccess(result)
+    })
+
+    it(`should have created the topic`, async () => {
+      const result = await topicExists(onTheFlyTopic)
+      assertSuccess(result)
     })
 
     it(`should create a topic`, async () => {
@@ -102,8 +112,10 @@ describe(`pubsub.js`, function() {
     })
 
     it(`should delete the topic`, async () => {
-      const result = await deleteTopic(topicName)
-      assertSuccess(result, topicName)
+      const r1 = await deleteTopic(topicName)
+      assertSuccess(r1, topicName)
+      const r2 = await deleteTopic(onTheFlyTopic)
+      assertSuccess(r2, onTheFlyTopic)
     })
 
     it(`should delete the subscription`, async () => {
@@ -121,12 +133,8 @@ describe(`pubsub.js`, function() {
     const topicName = `lib_test_${uuid.v4()}`
     const subscriptionName = `lib_test_${uuid.v4()}`
 
-    it(`create subscriber`, () => {
-      _createSubscriber()
-    })
-
-    it(`create publisher`, () => {
-      _createPublisher()
+    it(`should set the project`, () => {
+      setProject(GC_PROJECT_ID)
     })
 
     it(`should create a topic`, async () => {
@@ -196,11 +204,8 @@ describe(`pubsub.js`, function() {
     const topicName = `lib_test_${uuid.v4()}`
     const subscriptionName = `lib_test_${uuid.v4()}`
 
-    it(`create subscriber`, () => {
-      _createSubscriber()
-    })
-    it(`create publisher`, () => {
-      _createPublisher()
+    it(`should set the project`, () => {
+      setProject(GC_PROJECT_ID)
     })
 
     it(`should create a topic`, async () => {
@@ -261,11 +266,8 @@ describe(`pubsub.js`, function() {
       attributes: { today: 'saturday' },
     }
 
-    it(`create subscriber`, () => {
-      _createSubscriber()
-    })
-    it(`create publisher`, () => {
-      _createPublisher()
+    it(`should set the project`, () => {
+      setProject(GC_PROJECT_ID)
     })
 
     it(`should create a topic`, async () => {
@@ -324,11 +326,8 @@ describe(`pubsub.js`, function() {
     const topicName = `lib_test_${uuid.v4()}`
     const subscriptionName = `lib_test_${uuid.v4()}`
 
-    it(`create subscriber`, () => {
-      _createSubscriber()
-    })
-    it(`create publisher`, () => {
-      _createPublisher()
+    it(`should set the project`, () => {
+      setProject(GC_PROJECT_ID)
     })
 
     it(`should create a topic`, async () => {
