@@ -1,0 +1,26 @@
+root: true
+
+extends:
+- prettier
+
+plugins:
+- prettier
+- mocha
+
+env:
+  es6: true
+  node: true
+  mocha: true
+
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: script
+
+rules:
+
+  prettier/prettier:
+    - error
+    -
+      trailingComma: all
+      bracketSpacing: false
+

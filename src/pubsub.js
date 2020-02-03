@@ -1,233 +1,179 @@
-const {
-  failure,
-  success,
-  isFailure,
-  payload,
-  anyFailed,
-  firstFailure,
-} = require('@pheasantplucker/failables')
-const PubSub = require('@google-cloud/pubsub')
-const { pluck, contains, map } = require('ramda')
+"use strict";
 
-let project
-let publisher
-let subscriber
+let project;
+let pubsub;
+let publisher;
+let subscriber;
+let hasWarnedCredentials = false;
 
-const setProject = projectId => (project = projectId)
-const createPublisher = () => {
-  try {
-    publisher = new PubSub.v1.PublisherClient()
-    return success(publisher)
-  } catch (e) {
-    return failure(e.toString())
+function setup(gcpPubSub, projectId) {
+  if (!gcpPubSub) {
+    throw new Error("gcpPubSub required");
   }
-}
-const createSubscriber = () => {
-  try {
-    subscriber = new PubSub.v1.SubscriberClient()
-    return success(subscriber)
-  } catch (e) {
-    return failure(e.toString())
+  if (!projectId) {
+    throw new Error("projectId required");
   }
-}
-
-createPublisher()
-createSubscriber()
-
-const createTopic = async topicName => {
-  const existsResult = await topicExists(topicName)
-  if (isFailure(existsResult)) return existsResult
-  const exists = payload(existsResult)
-  if (exists) return success(topicName)
-  try {
-    const topic = publisher.topicPath(project, topicName)
-    await publisher.createTopic({ name: topic })
-    return success(topicName)
-  } catch (e) {
-    return failure(e.toString())
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !hasWarnedCredentials) {
+    // auth may also be accomplished via GCP scopes or application defaults, so warn instead of throw:
+    console.warn(
+      `GOOGLE_APPLICATION_CREDENTIALS env var missing, if not authed via application defaults or GCP scopes, see:
+https://cloud.google.com/docs/authentication/getting-started#setting_the_environment_variable`,
+    );
+    hasWarnedCredentials = true;
   }
+
+  project = projectId;
+  pubsub = gcpPubSub;
+  publisher = new pubsub.v1.PublisherClient();
+  subscriber = new pubsub.v1.SubscriberClient();
 }
 
-const getAllTopics = async () => {
-  try {
-    const projectPath = publisher.projectPath(project)
-    const [resources] = await publisher.listTopics({ project: projectPath })
-    return success(resources)
-  } catch (e) {
-    return failure(e.toString())
+async function createTopic(topicName) {
+  const client = new pubsub.PubSub({projectId: project});
+  const topic = client.topic(topicName);
+  return topic.get({autoCreate: true});
+}
+
+async function deleteTopic(topicName) {
+  const topic = publisher.topicPath(project, topicName);
+  await publisher.deleteTopic({topic});
+  return topicName;
+}
+
+async function createSubscription(topicName, subscriptionName, options = {}) {
+  const subscritionExists = await subscriptionExists(subscriptionName);
+  if (subscritionExists) {
+    console.info(`pubsub subscription ${subscriptionName} already exists`);
+    return {success: true};
   }
+
+  const request = {
+    name: subscriber.subscriptionPath(project, subscriptionName),
+    topic: publisher.topicPath(project, topicName),
+  };
+  const allOptions = {...request, ...options};
+  await subscriber.createSubscription(allOptions);
+  return {success: true};
 }
 
-const topicExists = async topicName => {
-  let topic
-  try {
-    topic = publisher.topicPath(project, topicName)
-  } catch (e) {
-    return failure(e.toString())
-  }
-  const getAllTopicsResult = await getAllTopics()
-  if (isFailure(getAllTopicsResult)) return getAllTopicsResult
-  const allTopics = payload(getAllTopicsResult)
+async function deleteSubscription(subscriptionName) {
+  const subscription = subscriber.subscriptionPath(project, subscriptionName);
 
-  return success(propertyMatches(allTopics, 'name', topic))
+  return subscriber.deleteSubscription({subscription});
 }
 
-const deleteTopic = async topicName => {
-  try {
-    const topic = publisher.topicPath(project, topicName)
-    await publisher.deleteTopic({ topic })
-    return success(topicName)
-  } catch (e) {
-    return failure(e.toString())
-  }
-}
-
-const createSubscription = async (
-  topicName,
-  subscriptionName,
-  options = {}
-) => {
-  const subResult = await subscriptionExists(subscriptionName)
-  if (isFailure(subResult)) return subResult
-  const subExists = payload(subResult)
-  if (subExists) return success(subscriptionName)
-  const topicResult = await createTopic(topicName)
-  if (isFailure(topicResult)) return topicResult
-  try {
-    const request = {
-      name: subscriber.subscriptionPath(project, subscriptionName),
-      topic: publisher.topicPath(project, topicName),
-    }
-    const allOptions = Object.assign({}, request, options)
-    await subscriber.createSubscription(allOptions)
-    return success(subscriptionName)
-  } catch (e) {
-    return failure(e.toString())
-  }
-}
-
-const deleteSubscription = async subscriptionName => {
-  try {
-    const subscription = subscriber.subscriptionPath(project, subscriptionName)
-    await subscriber.deleteSubscription({ subscription })
-    return success(subscriptionName)
-  } catch (e) {
-    return failure(e.toString())
-  }
-}
-
-const getAllSubscriptions = async () => {
-  try {
-    const projectPath = subscriber.projectPath(project)
-    const [resources] = await subscriber.listSubscriptions({
-      project: projectPath,
-    })
-    return success(resources)
-  } catch (e) {
-    return failure(e.toString())
-  }
-}
-
-const subscriptionExists = async subscriptionName => {
-  const subscription = subscriber.subscriptionPath(project, subscriptionName)
-  const getAllSubscriptionsResult = await getAllSubscriptions()
-  if (isFailure(getAllSubscriptionsResult)) return getAllSubscriptionsResult
-  const allSubscriptions = payload(getAllSubscriptionsResult)
-
-  return success(propertyMatches(allSubscriptions, 'name', subscription))
-}
-
-const propertyMatches = (list, property, name) => {
-  const justNames = pluck(property, list)
-  return contains(name, justNames)
-}
-
-const publish = async (topicName, message) => {
-  const topic = publisher.topicPath(project, topicName)
-  const { data: messageData } = message
-  const bufferedData = Buffer.from(messageData)
-  const bufferedMessage = Object.assign({}, message, {
-    data: bufferedData,
-  })
+async function publish(topicName, message) {
+  const topic = publisher.topicPath(project, topicName);
+  const {data: messageData} = message;
+  const bufferedData = Buffer.from(messageData);
+  const bufferedMessage = {...message, data: bufferedData};
   const request = {
     topic,
     messages: [bufferedMessage],
-  }
-  try {
-    const result = await publisher.publish(request)
-    return success(result)
-  } catch (e) {
-    return failure(e.toString())
-  }
+  };
+
+  return publisher.publish(request);
 }
 
-const publishJson = async (topicName, message) => {
-  const { data: messageData } = message
-  const stringifiedData = JSON.stringify(messageData)
-  const updatedMessage = Object.assign({}, message, { data: stringifiedData })
-  return publish(topicName, updatedMessage)
+async function publishJson(topicName, message) {
+  const stringifiedData = JSON.stringify(message);
+  const updatedMessage = {data: stringifiedData};
+  return publish(topicName, updatedMessage);
 }
 
-const publishMany = async (topicName, messages) => {
-  const promises = map(m => publish(topicName, m), messages)
-  const results = await Promise.all(promises)
-  if (anyFailed(results)) return firstFailure(results)
-  return success(messages.length)
-}
-
-const publishManyJson = async (topicName, messages) => {
-  const updatedMessages = map(
-    m => Object.assign({}, m, { data: JSON.stringify(m.data) }),
-    messages
-  )
-  return publishMany(topicName, updatedMessages)
-}
-
-const pull = async (
-  subscriptionName,
-  maxMessages = 1,
-  returnImmediately = true
-) => {
+// careful when returnImmediately = false,
+// the google library only waits ~5s before rejection
+async function pull(subscriptionName, maxMessages = 1, returnImmediately = true) {
   const request = {
     subscription: subscriber.subscriptionPath(project, subscriptionName),
     maxMessages,
     returnImmediately,
-  }
-  try {
-    const result = await subscriber.pull(request)
-    return success(result)
-  } catch (e) {
-    return failure(e.toString())
-  }
+  };
+  const [response] = await subscriber.pull(request);
+  return response.receivedMessages;
 }
 
-const acknowledge = async (subscriptionName, ackIds) => {
+async function acknowledge(subscriptionName, ackIds) {
+  if (!Array.isArray(ackIds)) {
+    ackIds = [ackIds];
+  }
   const request = {
     subscription: subscriber.subscriptionPath(project, subscriptionName),
     ackIds,
+  };
+  return subscriber.acknowledge(request);
+}
+
+async function subscriptionExists(subscriptionName) {
+  const subscriptionPath = subscriber.subscriptionPath(project, subscriptionName);
+  // https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+  const GRPC_ERROR_NOT_FOUND = 5;
+  const [subscription] = await subscriber
+    .getSubscription({subscription: subscriptionPath})
+    .catch(err => {
+      if (err.code === GRPC_ERROR_NOT_FOUND) {
+        return [null];
+      }
+      throw err;
+    });
+  return Boolean(subscription);
+}
+
+function jsonifyMessageData(message) {
+  const {data} = message;
+  const jsonString = data.toString("utf8");
+  return JSON.parse(jsonString);
+}
+
+async function topicExists(topicName) {
+  const topic = new pubsub.PubSub().topic(topicName);
+  const [exists] = await topic.exists();
+  return exists;
+}
+
+function getProject() {
+  return project;
+}
+
+function getPublisher() {
+  return publisher;
+}
+
+function getSubscriber() {
+  return subscriber;
+}
+
+async function publishMany(topicName, messages) {
+  const promises = [];
+  for (let i = 0; i < messages.length; i++) {
+    // batching is done internally in the google pub/sub library
+    // so this does not necessarily result in multiple requests over the wire
+    promises.push(publish(topicName, messages[i]));
   }
-  try {
-    const result = await subscriber.acknowledge(request)
-    return success(result)
-  } catch (e) {
-    return failure(e.toString())
-  }
+  await Promise.all(promises);
+}
+
+async function publishManyJson(topicName, messages) {
+  const updatedMessages = messages.map(m => ({...m, data: JSON.stringify(m.data)}));
+  return publishMany(topicName, updatedMessages);
 }
 
 module.exports = {
-  createPublisher,
-  createSubscriber,
-  createTopic,
-  topicExists,
-  deleteTopic,
+  acknowledge,
   createSubscription,
+  createTopic,
   deleteSubscription,
-  subscriptionExists,
+  deleteTopic,
+  getProject,
+  getPublisher,
+  getSubscriber,
+  jsonifyMessageData,
   publish,
   publishJson,
   publishMany,
   publishManyJson,
   pull,
-  acknowledge,
-  setProject,
-}
+  setup,
+  subscriptionExists,
+  topicExists,
+};

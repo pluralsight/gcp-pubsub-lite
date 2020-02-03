@@ -1,38 +1,40 @@
 {
-  "name": "@pheasantplucker/gc-pubsub",
-  "version": "3.0.0",
-  "description": "A failables wrapper around Google Cloud's Pubsub",
-  "main": "./src/pubsub.js",
+  "name": "gcp-pubsub-lite",
+  "version": "1.0.0",
+  "description": "Convenience wrapper for GCP Pub/Sub",
+  "main": "src/pubsub.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@google-cloud/pubsub": "^1.4.1",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "mocha": "^7.0.1",
+    "prettier": "^1.19.1"
+  },
+  "peerDependencies": {
+    "@google-cloud/pubsub": "^1.0.0"
+  },
   "scripts": {
-    "test": "jest --forceExit",
-    "lint": "esw .eslintrc.js src/ lib/ tests/ -w --fix --ignore-pattern !.eslintrc.js",
-    "deploy": "./deploy.sh"
+    "test": "mocha system-test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pluralsight/gcp-pubsub-lite.git"
+  },
+  "author": "gcp-pubsub-lite@pluralsight.com",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/pluralsight/gcp-pubsub-lite/issues"
   },
   "keywords": [
     "google",
     "cloud",
     "pubsub",
     "messaging",
-    "failables"
+    "wrapper"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pheasantplucker/gc-pubsub.git"
-  },
-  "author": "cgdibble@gmail.com",
-  "license": "ISC",
-  "devDependencies": {
-    "eslint": "^4.17.0",
-    "eslint-plugin-jest": "^21.9.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "eslint-watch": "^3.1.3",
-    "jest": "^22.4.3",
-    "prettier": "^1.7.4"
-  },
-  "dependencies": {
-    "@google-cloud/pubsub": "^0.18.0",
-    "@pheasantplucker/failables": "^2.0.3",
-    "ramda": "^0.25.0",
-    "uuid": "^3.2.1"
-  }
+  "homepage": "https://github.com/pluralsight/gcp-pubsub-lite#readme"
 }
