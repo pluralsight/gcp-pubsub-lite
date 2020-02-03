@@ -14,7 +14,7 @@ npm i @google-cloud/pubsub gcp-pubsub-lite
 
 ```javascript
 const gcpPubSub = require("@google-cloud/pubsub");
-const pubsub = require("gcp-pubsub-lite");
+const pubsub = require("@pluralsight/gcp-pubsub-lite");
 
 const {GCP_PROJECT_ID: gcpProjectId} = process.env;
 
