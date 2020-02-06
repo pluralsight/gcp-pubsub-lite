@@ -1,0 +1,55 @@
+name: test, version bump, tag, npm publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install and TODO test
+      run: |
+        npm install
+        # npm test
+      env:
+        CI: "true"
+    - name: Version increment
+      run: |
+        git config --local user.email "no-reply@pluralsight.com"
+        git config --local user.name "GitHub Action [BOT]"
+        BRANCH=${GITHUB_REF##*/}
+        echo "::set-env name=BRANCH::$BRANCH"
+        if [ "$BRANCH" == "master" ]; then
+          export APP_VERSION=$(npm version patch --no-git-tag-version)
+          else
+          export APP_VERSION=$(npm version prepatch --preid="test" --no-git-tag-version)
+        fi
+        echo "::set-env name=APP_VERSION::$APP_VERSION"
+        git commit -a -m "version increment: $APP_VERSION"
+        git tag -a $APP_VERSION -m "github action, version increment: $APP_VERSION"
+        echo "git tagged with $APP_VERSION"
+    - name: Git push version increment
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ env.BRANCH }}
+    - name: npm publish
+      run: |
+        npm set @pluralsight:registry=https://registry.npmjs.org
+        npm set //registry.npmjs.org/:_authToken "${{ secrets.NPM_PLURALSIGHT_AUTH_TOKEN }}"
+        npm publish
+      env:
+        CI: "true"
