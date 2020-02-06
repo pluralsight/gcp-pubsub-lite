@@ -1,6 +1,6 @@
 {
   "name": "@pluralsight/gcp-pubsub-lite",
-  "version": "1.0.3-test.0",
+  "version": "1.0.4-test.0",
   "description": "Convenience wrapper for GCP Pub/Sub",
   "main": "src/pubsub.js",
   "dependencies": {},
