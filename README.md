@@ -1,4 +1,6 @@
 # gcp-pubsub-lite
+<a href="https://badge.fury.io/js/%40pluralsight%2Fgcp-pubsub-lite"><img src="https://badge.fury.io/js/%40pluralsight%2Fgcp-pubsub-lite.svg" alt="npm version" height="18"></a>
+
 This is a convenience library/wrapper for the [official GCP Pub/Sub library](https://github.com/googleapis/nodejs-pubsub). You supply our wrapper with the official GCP Pub/Sub library so you control which version you want to use. This way, our library will not block you from applying e.g. the latest security updates. We will keep this library up-to-date to be compatible with recent versions of the official library. As of this writing, @google-cloud/pubsub versions 1.4.1+ are supported.
 
 The official library, while full-featured, requires some deeper understanding and boilerplate to accomplish common tasks. `gcp-pubsub-lite`, for example, enables simple subscription polling and sending/receiving JSON data as shown below.
