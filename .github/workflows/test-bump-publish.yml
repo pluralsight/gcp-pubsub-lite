@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - test
 
 jobs:
   build:
@@ -23,9 +24,11 @@ jobs:
     - name: npm install and integration test
       run: |
         npm install
-        export GOOGLE_APPLICATION_CREDENTIALS="${{ secrets.GCP_PUBSUB_TEST_SA_KEY }}"
+        echo -n '${{ secrets.GCP_PUBSUB_TEST_SA_KEY }}' > /tmp/sa.key
+        export GOOGLE_APPLICATION_CREDENTIALS="/tmp/sa.key"
         export GCP_PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}"
         npm test
+        rm -f /tmp/sa.key
       env:
         CI: "true"
     - name: Version increment
