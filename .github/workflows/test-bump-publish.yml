@@ -20,10 +20,12 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: npm install and TODO test
+    - name: npm install and integration test
       run: |
         npm install
-        # npm test
+        export GOOGLE_APPLICATION_CREDENTIALS="${{ secrets.GCP_PUBSUB_TEST_SA_KEY }}"
+        export GCP_PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}"
+        npm test
       env:
         CI: "true"
     - name: Version increment
