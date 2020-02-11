@@ -2,9 +2,9 @@
 <a href="https://badge.fury.io/js/%40pluralsight%2Fgcp-pubsub-lite"><img src="https://badge.fury.io/js/%40pluralsight%2Fgcp-pubsub-lite.svg" alt="npm version" height="18"></a>
 <img alt="GitHub Workflow Status" src="https://github.com/pluralsight/gcp-pubsub-lite/workflows/test%2C%20version%20bump%2C%20tag%2C%20npm%20publish/badge.svg">
 
-This is a convenience library/wrapper for the [official GCP Pub/Sub library](https://github.com/googleapis/nodejs-pubsub). You supply our wrapper with the official GCP Pub/Sub library so you control which version you want to use. This way, our library will not block you from applying e.g. the latest security updates. We will keep this library up-to-date to be compatible with recent versions of the official library. Currently `@google-cloud/pubsub` versions 1.4.1+ are supported.
+This is a convenience library/wrapper for the [official GCP Pub/Sub library](https://github.com/googleapis/nodejs-pubsub). You supply our wrapper with the official GCP Pub/Sub library so you control which version you want to use. This way, our library will not block you from applying e.g. the latest security updates, or pinning to a previous version. We will keep this library up-to-date to be compatible with recent versions of the official library. Currently we support `@google-cloud/pubsub` versions 1.4.1+.
 
-The official library, while full-featured, requires some deeper understanding and boilerplate to accomplish common tasks. `gcp-pubsub-lite`, for example, enables simple subscription polling and sending/receiving JSON data as shown below.
+The official Google library, while full-featured, requires focused reading to understand and boilerplate to accomplish simple tasks. It uses an OO approach where the same things can be accomplished with different classes, in slightly different ways. By contrast, `gcp-pubsub-lite` uses simple, easy to use, functions. For example, `gcp-pubsub-lite` enables simple subscription polling and sending/receiving JSON data as shown below.
 
 ## Installation
 
