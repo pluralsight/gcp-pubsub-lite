@@ -2,7 +2,7 @@
 <a href="https://badge.fury.io/js/%40pluralsight%2Fgcp-pubsub-lite"><img src="https://badge.fury.io/js/%40pluralsight%2Fgcp-pubsub-lite.svg" alt="npm version" height="18"></a>
 <img alt="GitHub Workflow Status" src="https://github.com/pluralsight/gcp-pubsub-lite/workflows/test%2C%20version%20bump%2C%20tag%2C%20npm%20publish/badge.svg">
 
-This is a convenience library/wrapper for the [official GCP Pub/Sub library](https://github.com/googleapis/nodejs-pubsub). You supply our wrapper with the official GCP Pub/Sub library so you control which version you want to use. This way, our library will not block you from applying e.g. the latest security updates, or pinning to a previous version. We will keep this library up-to-date to be compatible with recent versions of the official library. Currently we support `@google-cloud/pubsub` versions 1.4.1+.
+This is a convenience library/wrapper for the [official GCP Pub/Sub library](https://github.com/googleapis/nodejs-pubsub). You supply our wrapper with the official GCP Pub/Sub library so you control which version you want to use. This way, our library will not block you from applying e.g. the latest security updates, or pinning to a previous version. We will keep this library up-to-date to be compatible with recent versions of the official library. Currently we support `@google-cloud/pubsub` versions 1.4.1+ and node.js v12+.
 
 The official Google library, while full-featured, requires focused reading to understand and boilerplate to accomplish simple tasks. It uses an OO approach where the same things can be accomplished with different classes, in slightly different ways. By contrast, `gcp-pubsub-lite` uses simple, easy to use, functions. For example, `gcp-pubsub-lite` enables simple subscription polling and sending/receiving JSON data as shown below.
 
@@ -11,7 +11,6 @@ The official Google library, while full-featured, requires focused reading to un
 ```bash
 npm i @google-cloud/pubsub @pluralsight/gcp-pubsub-lite
 ```
-
 
 ## Usage Example
 
@@ -51,5 +50,9 @@ await Promise.all([pubsub.deleteSubscription(subName),
                    pubsub.deleteTopic(topicName)]);
 
 ```
+
+<!--automated documentation goes below here-->
+<!--automated documentation goes above here-->
+
 ## Contributions
 Pull Requests are welcome.
