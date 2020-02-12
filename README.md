@@ -87,7 +87,7 @@ await Promise.all([pubsub.deleteSubscription(subName),
 <dd><p>Whether or not a subscription exists</p>
 </dd>
 <dt><a href="#jsonifyMessageData">jsonifyMessageData(message)</a> ⇒ <code>*</code></dt>
-<dd><p>Takes a pub/sub message and returns the data part in json format</p>
+<dd><p>Takes a JSON pub/sub message and returns the data part as a native javascript value</p>
 </dd>
 <dt><a href="#topicExists">topicExists(topicName)</a> ⇒ <code>Promise.&lt;boolean&gt;</code></dt>
 <dd><p>Checks whether a topic exists</p>
@@ -237,10 +237,10 @@ Whether or not a subscription exists
 <a name="jsonifyMessageData"></a>
 
 ### jsonifyMessageData(message) ⇒ <code>\*</code>
-Takes a pub/sub message and returns the data part in json format
+Takes a JSON pub/sub message and returns the data part as a native javascript value
 
 **Kind**: global function  
-**Returns**: <code>\*</code> - json-formatted message data  
+**Returns**: <code>\*</code> - native javascript value  
 
 | Param | Type | Description |
 | --- | --- | --- |
