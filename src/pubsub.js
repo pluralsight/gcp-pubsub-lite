@@ -206,7 +206,7 @@ function getProject() {
 }
 
 /**
- * inspects this module, get internal google pub/sub publisher
+ * inspects this module, get internal google pub/sub publisher client
  * @returns {PublisherClient} https://googleapis.dev/nodejs/pubsub/latest/v1.PublisherClient.html
  */
 function getPublisher() {
@@ -214,7 +214,7 @@ function getPublisher() {
 }
 
 /**
- * inspects this module, get internal google pub/sub subscriber
+ * inspects this module, get internal google pub/sub subscriber client
  * @returns {SubscriberClient} https://googleapis.dev/nodejs/pubsub/latest/v1.SubscriberClient.html
  */
 function getSubscriber() {

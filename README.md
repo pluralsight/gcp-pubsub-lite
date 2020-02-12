@@ -51,6 +51,7 @@ await Promise.all([pubsub.deleteSubscription(subName),
 
 ```
 
+## Documentation
 <!--automated documentation goes below here-->
 <!--automated documentation goes above here-->
 

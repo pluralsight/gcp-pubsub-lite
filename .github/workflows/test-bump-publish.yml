@@ -31,7 +31,7 @@ jobs:
         rm -f /tmp/sa.key
       env:
         CI: "true"
-    - name: Version increment
+    - name: Documentation update, Version increment
       run: |
         git config --local user.email "no-reply@pluralsight.com"
         git config --local user.name "GitHub Action [BOT]"
@@ -43,10 +43,15 @@ jobs:
           export APP_VERSION=$(npm version prepatch --preid="test" --no-git-tag-version)
         fi
         echo "::set-env name=APP_VERSION::$APP_VERSION"
+
+        grep --color=never -B9999999 "<\!--automated documentation goes below here-->" README.md > /tmp/before.md
+        ./node_modules/.bin/jsdoc2md -d 3 src/pubsub.js > /tmp/middle.md
+        grep --color=never -A9999999 "<\!--automated documentation goes above here-->" README.md > /tmp/after.md
+        cat /tmp/before.md /tmp/middle.md /tmp/after.md > README.md
         git commit -a -m "version increment: $APP_VERSION"
         git tag -a $APP_VERSION -m "github action, version increment: $APP_VERSION"
         echo "git tagged with $APP_VERSION"
-    - name: Git push version increment
+    - name: Git push automated commit
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
