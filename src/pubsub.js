@@ -176,9 +176,9 @@ async function subscriptionExists(subscriptionName) {
 }
 
 /**
- * Takes a pub/sub message and returns the data part in json format
+ * Takes a JSON pub/sub message and returns the data part as a native javascript value
  * @param {receivedMessage} message https://googleapis.dev/nodejs/pubsub/latest/google.pubsub.v1.html#.ReceivedMessage
- * @returns {*} json-formatted message data
+ * @returns {*} native javascript value
  */
 function jsonifyMessageData(message) {
   const {data} = message;
