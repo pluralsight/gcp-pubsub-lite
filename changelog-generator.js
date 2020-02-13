@@ -65,7 +65,7 @@ if (chores.length) {
 
 // prepend the newChangelog to the current one
 fs.writeFileSync("./CHANGELOG.md", `${newChangelog}${currentChangelog}`);
-fs.writeFileSync("./package.json", JSON.stringify({ version: String(newVersion) }, null, 2));
+
 
 // create a new commit
 child.execSync('git add .');
