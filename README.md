@@ -9,7 +9,11 @@ The official Google library, while full-featured, requires focused reading to un
 ## Installation
 
 ```bash
+# npm
 npm i @google-cloud/pubsub @pluralsight/gcp-pubsub-lite
+
+# yarn
+yarn add @google-cloud/pubsub @pluralsight/gcp-pubsub-lite
 ```
 
 ## Usage Example
