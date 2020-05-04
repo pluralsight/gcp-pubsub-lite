@@ -20,38 +20,39 @@ yarn add @google-cloud/pubsub @pluralsight/gcp-pubsub-lite
 
 ```javascript
 const gcpPubSub = require("@google-cloud/pubsub");
-const pubsub = require("@pluralsight/gcp-pubsub-lite");
+const psLite = require("@pluralsight/gcp-pubsub-lite");
 
 const {GCP_PROJECT_ID: gcpProjectId} = process.env;
-pubsub.setup(gcpPubSub, gcpProjectId);
+psLite.setup(gcpPubSub, gcpProjectId);
 
 const topicName = "topicName";
-await pubsub.createTopic(topicName);
+await psLite.createTopic(topicName); // idempotent
 
 const subName = "subName";
-await pubsub.createSubscription(topicName, subName);
+await psLite.createSubscription(topicName, subName); // idempotent
 
 const messageData = {test: true, count: 5, data: "foobar", pi: 3.14};
-await pubsub.publishJson(topicName, messageData);
-let isPolling = true
+await psLite.publishJson(topicName, messageData);
+let isPolling = true;
 
 while (isPolling) {
-    let envelopes = []
-    envelopes = await pubsub.pull(subName, 1);
+    const envelopes = await psLite.pull(subName, 1);
     if (!envelopes.length) {
+      // wait 500ms and try again
       await new Promise(resolve => setTimeout(resolve, 500));
       continue;
     }
     const [envelope] = envelopes;
     const {message, ackId} = envelope;
-    const copyOfMessageData = pubsub.jsonifyMessageData(message);
+    const copyOfMessageData = psLite.jsonifyMessageData(message);
 
-    console.log("message", copyOfMessageData);
-    await pubsub.acknowledge(subName, [ackId]);
+    console.log("message contains:", copyOfMessageData);
+    await psLite.acknowledge(subName, [ackId]);
+    isPolling = false;
 }
 
-await Promise.all([pubsub.deleteSubscription(subName),
-                   pubsub.deleteTopic(topicName)]);
+await Promise.all([psLite.deleteSubscription(subName),
+                   psLite.deleteTopic(topicName)]);
 
 ```
 
